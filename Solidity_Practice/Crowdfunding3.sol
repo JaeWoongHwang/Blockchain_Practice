@@ -18,8 +18,11 @@ contract Crowdfunding {
     }
 
     // 일주일 뒤의 날짜를 반환하는 getDeadline(uint _now) 함수를 pure 함수로 작성해보세요.
-    function getDeadline(uint _now) public view returns (uint){
+    /* function getDeadline(uint _now) public view returns (uint){
       now = _now + 604800;
       return now;
+    } */
+    function getDeadline(uint _now) public pure returns(uint){
+        return _now + (3600 * 24 * 7);
     }
 }
