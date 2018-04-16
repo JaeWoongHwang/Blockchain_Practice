@@ -63,7 +63,7 @@ contract Crowdfunding {
     }
 
     function checkFundingGoal(uint _campaignId)
-    /* arguments에 유의하며, 함수 제어자 campaignOwner를 호출하세요. */
+    // 함수 제어자 campaignOwner를 호출
     public campaignOwner {
         Campaign memory c = campaigns[_campaignId];
 
