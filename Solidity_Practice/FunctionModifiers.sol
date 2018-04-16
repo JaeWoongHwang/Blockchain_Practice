@@ -14,6 +14,12 @@ contract Crowdfunding {
     mapping (uint => Campaign) campaigns;
     uint campaignsId = 0;
 
+    // 캠페인 생성자만 허용하는 함수제어자 campaignOwner
+    modifier campaignOwner(uint _campaignId) {
+        require(campaigns[_campaignId].creator == msg.sender);
+        _;
+    }
+
     event GeneratedCampaign(
         uint indexed _id,
         address indexed _creator,
@@ -36,15 +42,13 @@ contract Crowdfunding {
     );
 
     function createCampaign(uint _fundingGoal) public {
-        campaigns[campaignsId] = Campaign(campaignsId,
-                                          msg.sender, _fundingGoal,
-                                          0, getDeadline(now),
-                                          /* closed의 초기값 */ false);
+        campaigns[campaignsId] = Campaign(campaignsId, msg.sender,
+                                          _fundingGoal, 0,
+                                          getDeadline(now), false);
 
-        Campaign memory c = campaigns[campaignsId];
+        Campaign memory campaign = campaigns[campaignsId];
         GeneratedCampaign(campaignsId, msg.sender,
-                          c.fundingGoal,
-                          c.deadline);
+                          campaign.fundingGoal, campaign.deadline);
         campaignsId++;
     }
 
@@ -58,15 +62,18 @@ contract Crowdfunding {
                      campaigns[_campaignId].pledgedFund);
     }
 
-    // 펀딩 금액을 지급해주는 함수
-    function checkFundingGoal(uint _campaignId) public {
-        if (campaigns[_campaignId].fundingGoal <= campaigns[_campaignId].pledgedFund) {
-            campaigns[_campaignId].closed = true;
-            // 캠페인 creator에게 pledgedFund를 transfer
-            msg.sender.transfer(campaigns[_campaignId].pledgedFund);
-            // FundTransfer 이벤트를 호출
+    function checkFundingGoal(uint _campaignId)
+    /* arguments에 유의하며, 함수 제어자 campaignOwner를 호출하세요. */
+    public campaignOwner {
+        Campaign memory c = campaigns[_campaignId];
+
+        if (c.fundingGoal <= c.pledgedFund) {
+             campaigns[_campaignId].closed = true;
+
+            msg.sender.transfer(c.pledgedFund);
             FundTransfer(_campaignId, msg.sender,
-                          campaigns[_campaignId].pledgedFund, campaigns[_campaignId].closed);
+                         c.pledgedFund,
+                         campaigns[_campaignId].closed);
         } else {
             revert();
         }
