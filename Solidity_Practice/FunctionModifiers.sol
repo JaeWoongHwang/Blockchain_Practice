@@ -62,9 +62,10 @@ contract Crowdfunding {
                      campaigns[_campaignId].pledgedFund);
     }
 
-    function checkFundingGoal(uint _campaignId)
     // 함수 제어자 campaignOwner를 호출
-    public campaignOwner {
+    function checkFundingGoal(uint _campaignId) public campaignOwner {
+        campaigns[_campaignId].pledgedFund = _pledgedFund;
+
         Campaign memory c = campaigns[_campaignId];
 
         if (c.fundingGoal <= c.pledgedFund) {
