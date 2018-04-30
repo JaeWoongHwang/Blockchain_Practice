@@ -36,6 +36,8 @@
   },
   "dependencies": {
     "ganache-cli": "^6.1.0",
-    "solc": "^0.4.23"
+    "solc": "^0.4.23",
+    "truffle": "^4.1.7",
+    "ethereumjs-util": "5.1.2"
   }
 }
