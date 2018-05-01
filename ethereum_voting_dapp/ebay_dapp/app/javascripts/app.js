@@ -20,49 +20,14 @@ window.App = {
   EcommerceStore.setProvider(web3.currentProvider);
   renderStore();
 
-  function renderStore() {
-   EcommerceStore.deployed().then(function(i) {
-    i.getProduct.call(1).then(function(p) {
-     $("#product-list").append(buildProduct(p));
-    });
-    i.getProduct.call(2).then(function(p) {
-     $("#product-list").append(buildProduct(p));
-    });
-   });
-  }
-
-  function buildProduct(product) {
-   let node = $("<div/>");
-   node.addClass("col-sm-3 text-center col-margin-bottom-1");
-   node.append("<img src='https://ipfs.io/ipfs/" + product[3] + "' width='150px' />");
-   node.append("<div>" + product[1]+ "</div>");
-   node.append("<div>" + product[2]+ "</div>");
-   node.append("<div>" + product[5]+ "</div>");
-   node.append("<div>" + product[6]+ "</div>");
-   node.append("<div>Ether " + product[7] + "</div>");
-   return node;
-  }
-
-  var reader;
-
+  // When change event occurred
   $("#product-image").change(function(event) {
-    const file = event.target.files[0]
-    reader = new window.FileReader()
-    reader.readAsArrayBuffer(file)
-  });
-
-  $("#add-item-to-store").submit(function(event) {
-   const req = $("#add-item-to-store").serialize();
-   let params = JSON.parse('{"' + req.replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
-   let decodedParams = {}
-   Object.keys(params).forEach(function(v) {
-    decodedParams[v] = decodeURIComponent(decodeURI(params[v]));
-   });
-   saveProduct(reader, decodedParams);
-   event.preventDefault();
-
-   // Deploy image and description on IPFS
-   function saveImageOnIpfs(reader) {
+   const file = event.target.files[0]
+   reader = new window.FileReader()
+   reader.readAsArrayBuffer(file)
+ });
+  // Save images on IPFS
+  function saveImageOnIpfs(reader) {
    return new Promise(function(resolve, reject) {
     const buffer = Buffer.from(reader.result);
     ipfs.add(buffer)
@@ -74,8 +39,9 @@ window.App = {
      reject(err);
     })
    })
-   }
+  }
 
+ // Save texdt on ipfs
    function saveTextBlobOnIpfs(blob) {
    return new Promise(function(resolve, reject) {
     const descBuffer = Buffer.from(blob, 'utf-8');
@@ -88,21 +54,32 @@ window.App = {
      reject(err);
     })
    })
-   }
+  }
 
-   // Save Product
-   function saveProduct(reader, decodedParams) {
-    let imageId, descId;
-    saveImageOnIpfs(reader).then(function(id) {
-      imageId = id;
-      saveTextBlobOnIpfs(decodedParams["product-description"]).then(function(id) {
-        descId = id;
-         saveProductToBlockchain(decodedParams, imageId, descId);
+  // When submit event occurred
+  $("#add-item-to-store").submit(function(event) {
+     const req = $("#add-item-to-store").serialize();
+     let params = JSON.parse('{"' + req.replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
+     let decodedParams = {}
+     Object.keys(params).forEach(function(v) {
+      decodedParams[v] = decodeURIComponent(decodeURI(params[v]));
+     });
+     saveProduct(reader, decodedParams);
+     event.preventDefault();
+  });
+
+  function saveProduct(reader, decodedParams) {
+  let imageId, descId;
+  saveImageOnIpfs(reader).then(function(id) {
+    imageId = id;
+    saveTextBlobOnIpfs(decodedParams["product-description"]).then(function(id) {
+      descId = id;
+       saveProductToBlockchain(decodedParams, imageId, descId);
       })
    })
-   }
+  }
 
-   function saveProductToBlockchain(params, imageId, descId) {
+  function saveProductToBlockchain(params, imageId, descId) {
     console.log(params);
     let auctionStartTime = Date.parse(params["product-auction-start"]) / 1000;
     let auctionEndTime = auctionStartTime + parseInt(params["product-auction-end"]) * 24 * 60 * 60
@@ -115,9 +92,34 @@ window.App = {
      $("#msg").html("Your product was successfully added to your store!");
     })
    });
-   }
+  }
+
  }
 };
+
+// Deploy products on IPFS
+function renderStore() {
+ EcommerceStore.deployed().then(function(i) {
+  i.getProduct.call(1).then(function(p) {
+   $("#product-list").append(buildProduct(p));
+  });
+  i.getProduct.call(2).then(function(p) {
+   $("#product-list").append(buildProduct(p));
+  });
+ });
+}
+
+function buildProduct(product) {
+ let node = $("<div/>");
+ node.addClass("col-sm-3 text-center col-margin-bottom-1");
+ node.append("<img src='https://ipfs.io/ipfs/" + product[3] + "' width='150px' />");
+ node.append("<div>" + product[1]+ "</div>");
+ node.append("<div>" + product[2]+ "</div>");
+ node.append("<div>" + product[5]+ "</div>");
+ node.append("<div>" + product[6]+ "</div>");
+ node.append("<div>Ether " + product[7] + "</div>");
+ return node;
+}
 
 window.addEventListener('load', function() {
  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
