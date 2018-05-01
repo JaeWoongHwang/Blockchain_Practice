@@ -12,8 +12,9 @@ contract EcommerceStore {
   uint id;
   string name;
   string category;
-  string imageLink;
-  string descLink;
+  // Hash of Product's image, description
+  string imageLink = "QmdnbmVzFTH4DozmBWBhRfEhLtnBM5JDnrL124HCiSNU5Q";
+  string descLink = "QmTKvuGaXjZMwJmNTL6ztyNzGwHkXRpX4k7XLJzRAoHUxz";
   uint auctionStartTime;
   uint auctionEndTime;
   uint startPrice;
