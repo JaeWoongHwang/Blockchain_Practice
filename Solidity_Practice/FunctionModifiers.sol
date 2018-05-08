@@ -14,9 +14,9 @@ contract Crowdfunding {
     mapping (uint => Campaign) campaigns;
     uint campaignsId = 0;
 
-    // 캠페인 생성자만 허용하는 함수제어자 campaignOwner
+    // 캠페인 생성자만 허용하는 함수제어자 campaignOwner 선언
     modifier campaignOwner(uint _campaignId) {
-        require(campaigns[_campaignId].creator == msg.sender);
+        require(msg.sender == campaigns[_campaignId].creator);
         _;
     }
 
@@ -62,10 +62,10 @@ contract Crowdfunding {
                      campaigns[_campaignId].pledgedFund);
     }
 
-    // 함수 제어자 campaignOwner를 호출
-    function checkFundingGoal(uint _campaignId) public campaignOwner {
-        campaigns[_campaignId].pledgedFund = _pledgedFund;
-
+    // 함수제어자 campaignOwner 호출
+    function checkFundingGoal(uint _campaignId)
+    campaignOwner(_campaignId)
+    public {
         Campaign memory c = campaigns[_campaignId];
 
         if (c.fundingGoal <= c.pledgedFund) {
